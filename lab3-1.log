@@ -1,0 +1,122 @@
+Initialising Kubernetes... done
+
+controlplane $ kubectl apply -f https://k8s.io/examples/application/deployment.yaml
+deployment.apps/nginx-deployment created
+controlplane $ kubectl describe deployment nginx-deployment
+Name:                   nginx-deployment
+Namespace:              default
+CreationTimestamp:      Sun, 28 Jan 2024 14:38:25 +0000
+Labels:                 <none>
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               app=nginx
+Replicas:               2 desired | 2 updated | 2 total | 1 available | 1 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=nginx
+  Containers:
+   nginx:
+    Image:        nginx:1.14.2
+    Port:         80/TCP
+    Host Port:    0/TCP
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      False   MinimumReplicasUnavailable
+  Progressing    True    ReplicaSetUpdated
+OldReplicaSets:  <none>
+NewReplicaSet:   nginx-deployment-86dcfdf4c6 (2/2 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  5s    deployment-controller  Scaled up replica set nginx-deployment-86dcfdf4c6 to 2
+controlplane $ kubectl get pods -l app=nginx
+NAME                                READY   STATUS    RESTARTS   AGE
+nginx-deployment-86dcfdf4c6-6r5zl   1/1     Running   0          11s
+nginx-deployment-86dcfdf4c6-cc78h   1/1     Running   0          11s
+controlplane $ kubectl describe pod nginx-deployment-86dcfdf4c6-6r5zl
+Name:             nginx-deployment-86dcfdf4c6-6r5zl
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             node01/172.30.2.2
+Start Time:       Sun, 28 Jan 2024 14:38:25 +0000
+Labels:           app=nginx
+                  pod-template-hash=86dcfdf4c6
+Annotations:      cni.projectcalico.org/containerID: 6254348efb7c154c46ba840f6395bbe6b1edf8fd5335e45fe0c57d6ca57a8760
+                  cni.projectcalico.org/podIP: 192.168.1.4/32
+                  cni.projectcalico.org/podIPs: 192.168.1.4/32
+Status:           Running
+IP:               192.168.1.4
+IPs:
+  IP:           192.168.1.4
+Controlled By:  ReplicaSet/nginx-deployment-86dcfdf4c6
+Containers:
+  nginx:
+    Container ID:   containerd://d199481ec8df24958c486b80d1448bd6d5d749794e9fb808a2536281c170c764
+    Image:          nginx:1.14.2
+    Image ID:       docker.io/library/nginx@sha256:f7988fb6c02e0ce69257d9bd9cf37ae20a60f1df7563c3a2a6abe24160306b8d
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sun, 28 Jan 2024 14:38:29 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-lkqgt (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-lkqgt:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  24s   default-scheduler  Successfully assigned default/nginx-deployment-86dcfdf4c6-6r5zl to node01
+  Normal  Pulling    24s   kubelet            Pulling image "nginx:1.14.2"
+  Normal  Pulled     20s   kubelet            Successfully pulled image "nginx:1.14.2" in 3.184s (3.184s including waiting)
+  Normal  Created    20s   kubelet            Created container nginx
+  Normal  Started    20s   kubelet            Started container nginx
+controlplane $ kubectl apply -f https://k8s.io/examples/application/deployment-update.yaml
+deployment.apps/nginx-deployment configured
+controlplane $ kubectl get pods -l app=nginx
+NAME                                READY   STATUS              RESTARTS   AGE
+nginx-deployment-848dd6cfb5-bk5zm   0/1     ContainerCreating   0          2s
+nginx-deployment-848dd6cfb5-fcx6d   1/1     Running             0          8s
+nginx-deployment-86dcfdf4c6-cc78h   1/1     Running             0          42s
+controlplane $ 
+controlplane $ kubectl edit deployment/nginx-deployment
+deployment.apps/nginx-deployment edited
+controlplane $ kubectl get pods
+NAME                                READY   STATUS    RESTARTS   AGE
+nginx-deployment-848dd6cfb5-c984x   1/1     Running   0          69s
+nginx-deployment-848dd6cfb5-d7qrx   1/1     Running   0          6s
+nginx-deployment-848dd6cfb5-drnvk   1/1     Running   0          6s
+nginx-deployment-848dd6cfb5-vfbjp   1/1     Running   0          65s
+controlplane $ kubectl port-forward <pod> 80:80 --address=0.0.0.0
+bash: pod: No such file or directory
+controlplane $ kubectl port-forward ^C0:80 --address=0.0.0.0
+controlplane $ kubectl port-forward nginx-deployment-848dd6cfb5-c984x 80:80 --address=0.0.0.0
+Forwarding from 0.0.0.0:80 -> 80
+Handling connection for 80
+Handling connection for 80
+^Ccontrolplane $ kubectl delete deployment nginx-deployment
+deployment.apps "nginx-deployment" deleted

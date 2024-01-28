@@ -1,0 +1,204 @@
+Initialising Kubernetes... done
+Initialising Scenario... done
+
+controlplane $ curl --proto '=https' --tlsv1.2 -sSfL https://run.linkerd.io/install | sh
+Downloading linkerd2-cli-stable-2.14.9-linux-amd64...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 50.2M  100 50.2M    0     0  55.6M      0 --:--:-- --:--:-- --:--:-- 55.6M
+Download complete!
+
+Validating checksum...
+Checksum valid.
+
+Linkerd stable-2.14.9 was successfully installed 🎉
+
+
+Add the linkerd CLI to your path with:
+
+  export PATH=$PATH:/root/.linkerd2/bin
+
+Now run:
+
+  linkerd check --pre                     # validate that Linkerd can be installed
+  linkerd install --crds | kubectl apply -f - # install the Linkerd CRDs
+  linkerd install | kubectl apply -f -    # install the control plane into the 'linkerd' namespace
+  linkerd check                           # validate everything worked!
+
+You can also obtain observability features by installing the viz extension:
+
+  linkerd viz install | kubectl apply -f -  # install the viz extension into the 'linkerd-viz' namespace
+  linkerd viz check                         # validate the extension works!
+  linkerd viz dashboard                     # launch the dashboard
+
+Looking for more? Visit https://linkerd.io/2/tasks
+
+controlplane $ echo 'export PATH=$PATH:/root/.linkerd2/bin' >> .bashrc
+controlplane $ export PATH=$PATH:/root/.linkerd2/bin
+controlplane $ /root/.linkerd2/bin/linkerd install --crds | kubectl apply -f -
+Rendering Linkerd CRDs...
+Next, run `linkerd install | kubectl apply -f -` to install the control plane.
+
+customresourcedefinition.apiextensions.k8s.io/authorizationpolicies.policy.linkerd.io created
+customresourcedefinition.apiextensions.k8s.io/httproutes.policy.linkerd.io created
+customresourcedefinition.apiextensions.k8s.io/meshtlsauthentications.policy.linkerd.io created
+customresourcedefinition.apiextensions.k8s.io/networkauthentications.policy.linkerd.io created
+customresourcedefinition.apiextensions.k8s.io/serverauthorizations.policy.linkerd.io created
+customresourcedefinition.apiextensions.k8s.io/servers.policy.linkerd.io created
+customresourcedefinition.apiextensions.k8s.io/serviceprofiles.linkerd.io created
+customresourcedefinition.apiextensions.k8s.io/httproutes.gateway.networking.k8s.io created
+controlplane $ /root/.linkerd2/bin/linkerd install | kubectl apply -f -
+namespace/linkerd created
+clusterrole.rbac.authorization.k8s.io/linkerd-linkerd-identity created
+clusterrolebinding.rbac.authorization.k8s.io/linkerd-linkerd-identity created
+serviceaccount/linkerd-identity created
+clusterrole.rbac.authorization.k8s.io/linkerd-linkerd-destination created
+clusterrolebinding.rbac.authorization.k8s.io/linkerd-linkerd-destination created
+serviceaccount/linkerd-destination created
+secret/linkerd-sp-validator-k8s-tls created
+validatingwebhookconfiguration.admissionregistration.k8s.io/linkerd-sp-validator-webhook-config created
+secret/linkerd-policy-validator-k8s-tls created
+validatingwebhookconfiguration.admissionregistration.k8s.io/linkerd-policy-validator-webhook-config created
+clusterrole.rbac.authorization.k8s.io/linkerd-policy created
+clusterrolebinding.rbac.authorization.k8s.io/linkerd-destination-policy created
+role.rbac.authorization.k8s.io/remote-discovery created
+rolebinding.rbac.authorization.k8s.io/linkerd-destination-remote-discovery created
+role.rbac.authorization.k8s.io/linkerd-heartbeat created
+rolebinding.rbac.authorization.k8s.io/linkerd-heartbeat created
+clusterrole.rbac.authorization.k8s.io/linkerd-heartbeat created
+clusterrolebinding.rbac.authorization.k8s.io/linkerd-heartbeat created
+serviceaccount/linkerd-heartbeat created
+clusterrole.rbac.authorization.k8s.io/linkerd-linkerd-proxy-injector created
+clusterrolebinding.rbac.authorization.k8s.io/linkerd-linkerd-proxy-injector created
+serviceaccount/linkerd-proxy-injector created
+secret/linkerd-proxy-injector-k8s-tls created
+mutatingwebhookconfiguration.admissionregistration.k8s.io/linkerd-proxy-injector-webhook-config created
+configmap/linkerd-config created
+role.rbac.authorization.k8s.io/ext-namespace-metadata-linkerd-config created
+secret/linkerd-identity-issuer created
+configmap/linkerd-identity-trust-roots created
+service/linkerd-identity created
+service/linkerd-identity-headless created
+deployment.apps/linkerd-identity created
+service/linkerd-dst created
+service/linkerd-dst-headless created
+service/linkerd-sp-validator created
+service/linkerd-policy created
+service/linkerd-policy-validator created
+deployment.apps/linkerd-destination created
+cronjob.batch/linkerd-heartbeat created
+deployment.apps/linkerd-proxy-injector created
+service/linkerd-proxy-injector created
+secret/linkerd-config-overrides created
+controlplane $ echo "### WAIT FOR LINKERD TO BE READY ### (this can take a few minutes)"
+### WAIT FOR LINKERD TO BE READY ### (this can take a few minutes)
+controlplane $ kubectl -n linkerd wait deploy --all --for condition=available --timeout=1h
+deployment.apps/linkerd-destination condition met
+deployment.apps/linkerd-identity condition met
+deployment.apps/linkerd-proxy-injector condition met
+controlplane $ linkerd version
+Client version: stable-2.14.9
+Server version: stable-2.14.9
+controlplane $ linkerd check
+kubernetes-api
+--------------
+√ can initialize the client
+√ can query the Kubernetes API
+
+kubernetes-version
+------------------
+√ is running the minimum Kubernetes API version
+
+linkerd-existence
+-----------------
+√ 'linkerd-config' config map exists
+√ heartbeat ServiceAccount exist
+√ control plane replica sets are ready
+√ no unschedulable pods
+√ control plane pods are ready
+√ cluster networks contains all node podCIDRs
+√ cluster networks contains all pods
+√ cluster networks contains all services
+
+linkerd-config
+--------------
+√ control plane Namespace exists
+√ control plane ClusterRoles exist
+√ control plane ClusterRoleBindings exist
+√ control plane ServiceAccounts exist
+√ control plane CustomResourceDefinitions exist
+√ control plane MutatingWebhookConfigurations exist
+√ control plane ValidatingWebhookConfigurations exist
+√ proxy-init container runs as root user if docker container runtime is used
+
+linkerd-identity
+----------------
+√ certificate config is valid
+√ trust anchors are using supported crypto algorithm
+√ trust anchors are within their validity period
+√ trust anchors are valid for at least 60 days
+√ issuer cert is using supported crypto algorithm
+√ issuer cert is within its validity period
+√ issuer cert is valid for at least 60 days
+√ issuer cert is issued by the trust anchor
+
+linkerd-webhooks-and-apisvc-tls
+-------------------------------
+√ proxy-injector webhook has valid cert
+√ proxy-injector cert is valid for at least 60 days
+√ sp-validator webhook has valid cert
+√ sp-validator cert is valid for at least 60 days
+√ policy-validator webhook has valid cert
+√ policy-validator cert is valid for at least 60 days
+
+linkerd-version
+---------------
+√ can determine the latest version
+√ cli is up-to-date
+
+control-plane-version
+---------------------
+√ can retrieve the control plane version
+√ control plane is up-to-date
+√ control plane and cli versions match
+
+linkerd-control-plane-proxy
+---------------------------
+√ control plane proxies are healthy
+√ control plane proxies are up-to-date
+√ control plane proxies and cli versions match
+
+Status check results are √
+controlplane $ kubectl create ns emojivoto
+namespace/emojivoto created
+controlplane $ kubectl annotate ns emojivoto linkerd.io/inject=enabled
+namespace/emojivoto annotated
+controlplane $ curl --proto '=https' --tlsv1.2 -sSfL https://run.linkerd.io/emojivoto.yml \
+>   | kubectl apply -f -
+Warning: resource namespaces/emojivoto is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
+namespace/emojivoto configured
+serviceaccount/emoji created
+serviceaccount/voting created
+serviceaccount/web created
+service/emoji-svc created
+service/voting-svc created
+service/web-svc created
+deployment.apps/emoji created
+deployment.apps/vote-bot created
+deployment.apps/voting created
+deployment.apps/web created
+controlplane $ kubectl -n emojivoto wait deploy --all --for condition=available --timeout=1h
+deployment.apps/emoji condition met
+deployment.apps/vote-bot condition met
+deployment.apps/voting condition met
+deployment.apps/web condition met
+controlplane $ kubectl -f /root/emojivoto-ingress.yaml apply
+ingress.networking.k8s.io/emojivoto-web-ingress created
+controlplane $ kubectl port-forward -n ingress-nginx --address 0.0.0.0 service/ingress-nginx-controller 1234:80
+Forwarding from 0.0.0.0:1234 -> 80
+Handling connection for 1234
+Handling connection for 1234
+Handling connection for 1234
+Handling connection for 1234
+

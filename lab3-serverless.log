@@ -1,0 +1,98 @@
+Initialising Kubernetes... done
+
+controlplane $ curl -o- -L https://slss.io/install | bash
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   170  100   170    0     0    629      0 --:--:-- --:--:-- --:--:--   629
+100  4184  100  4184    0     0   9175      0 --:--:-- --:--:-- --:--:--     0
+
+ Installing Serverless!
+
+ Downloading binary for version 3.38.0...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100  118M  100  118M    0     0  80.6M      0  0:00:01  0:00:01 --:--:--  137M
+
+ Added the following to /root/.bashrc:
+
+# Added by serverless binary installer
+export PATH="$HOME/.serverless/bin:$PATH"
+
+ Added the following to /root/.profile:
+
+# Added by serverless binary installer
+export PATH="$HOME/.serverless/bin:$PATH"
+Serverless Framework successfully installed!
+
+To start your first project, please open another terminal and run “serverless”.
+
+Turn on automatic updates by running “serverless config --autoupdate”.
+
+Uninstall at any time by running “serverless uninstall”.
+controlplane $ export PATH="$HOME/.serverless/bin:$PATH"
+controlplane $ serverless
+^[[B^[  
+Creating a new serverless project
+
+? What do you want to make? AWS - Python - Starter
+? What do you want to call this project? aws-python-project
+
+✔ Project successfully created in aws-python-project folder
+
+? Register or Login to Serverless Framework No
+
+? No AWS credentials found. Serverless Framework needs these to automate deployment of infra & code.
+  Choose which type of AWS credentials you would like to use, and we'll help you set them up: Local AWS
+ Access Keys
+? Do you have an AWS account? Yes
+
+If your browser does not open automatically, please open this URL: https://console.aws.amazon.com/iam/home?region=us-east-1#/users$new?step=final&accessKey&userNames=serverless&permissionType=policies&policies=arn:aws:iam::aws:policy%2FAdministratorAccess
+
+? In your AWS account, create an AWS user with access keys. Then press [Enter] to continue. 
+? AWS Access Key Id: ********************
+? AWS Secret Access Key: ****************************************
+
+✔ AWS credentials saved on your machine at "~/.aws/credentials". Go there to change them at any time.
+
+? Do you want to deploy now? Yes
+
+Deploying aws-python-project to stage dev (us-east-1)
+
+✔ Service deployed to stack aws-python-project-dev (97s)
+
+functions:
+  hello: aws-python-project-dev-hello (1.7 kB)
+
+What next?
+Run these commands in the project directory:
+
+serverless deploy    Deploy changes
+serverless info      View deployed endpoints and resources
+serverless invoke    Invoke deployed functions
+serverless --help    Discover more commands
+controlplane $ serverless invoke --function hello
+Environment: linux, node 16.16.0, framework 3.38.0 (standalone), plugin 7.2.0, SDK 4.5.1
+Docs:        docs.serverless.com
+Support:     forum.serverless.com
+Bugs:        github.com/serverless/serverless/issues
+
+Error:
+This command can only be run in a Serverless service directory. Make sure to reference a valid config file in the current working directory if you're using a custom config file
+controlplane $ cd 
+.aws/               .kube/              .vnc/               Pictures/           filesystem/
+.cache/             .local/             Desktop/            Public/             snap/
+.config/            .serverless/        Documents/          Templates/          
+.dbus/              .ssh/               Downloads/          Videos/             
+.gnupg/             .theia/             Music/              aws-python-project/ 
+controlplane $ cd aws-python-project/
+controlplane $ serverless invoke --function hello
+{
+    "statusCode": 200,
+    "body": "{\"message\": \"Go Serverless v3.0! Your function executed successfully!\", \"input\": {}}"
+}
+controlplane $ serverless remove
+Removing aws-python-project from stage dev (us-east-1)
+
+✔ Service aws-python-project has been successfully removed (25s)
+controlplane $ 

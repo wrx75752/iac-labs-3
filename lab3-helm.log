@@ -1,0 +1,132 @@
+controlplane $ ls        
+Chart.yaml  charts  templates  values.yaml
+controlplane $ rm -rf templates/*
+controlplane $ rm -rf charts 
+controlplane $ ls
+Chart.yaml  templates  values.yaml
+controlplane $ pwd
+/root/nginx-chart
+controlplane $ helm lint .
+==> Linting .
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+controlplane $ helm template .
+---
+# Source: nginx-chart/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: RELEASE-NAME-index-html-configmap
+  namespace: default
+data:
+  index.html: |
+    <html>
+    <h1>Welcome</h1>
+    </br>
+    <h1>Hello World from dev Environment using Helm</h1>
+    </html
+---
+# Source: nginx-chart/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: RELEASE-NAME-service
+spec:
+  selector:
+    app.kubernetes.io/instance: RELEASE-NAME
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9000
+---
+# Source: nginx-chart/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx-chart
+          image: "nginx:1.20.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+controlplane $ cd ~
+controlplane $ helm install nginx nginx-chart
+NAME: nginx
+LAST DEPLOYED: Sun Jan 28 15:07:21 2024
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+controlplane $ helm list
+NAME    NAMESPACE       REVISION        UPDATED                                 STATUS     CHART                   APP VERSION
+nginx   default         1               2024-01-28 15:07:21.096919378 +0000 UTC deployed   nginx-chart-0.1.0       1.0.0      
+controlplane $ kubectl get deployment
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   4/4     4            4           27s
+controlplane $ kubectl get configmap
+NAME                         DATA   AGE
+kube-root-ca.crt             1      23d
+nginx-index-html-configmap   1      35s
+controlplane $ kubectl get services
+NAME            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+kubernetes      ClusterIP   10.96.0.1      <none>        443/TCP   23d
+nginx-service   ClusterIP   10.101.65.76   <none>        80/TCP    41s
+controlplane $ kubectl get pods
+NAME                                READY   STATUS    RESTARTS   AGE
+nginx-deployment-79b77776db-2r28f   1/1     Running   0          47s
+nginx-deployment-79b77776db-896rc   1/1     Running   0          47s
+nginx-deployment-79b77776db-df9lj   1/1     Running   0          47s
+nginx-deployment-79b77776db-vzzfn   1/1     Running   0          47s
+controlplane $ mkdir envs
+controlplane $ helm upgrade nginx nginx-chart --values envs/prod.yaml
+Release "nginx" has been upgraded. Happy Helming!
+NAME: nginx
+LAST DEPLOYED: Sun Jan 28 15:10:49 2024
+NAMESPACE: default
+STATUS: deployed
+REVISION: 2
+TEST SUITE: None
+controlplane $ kubectl get pods
+NAME                                READY   STATUS    RESTARTS   AGE
+nginx-deployment-79b77776db-2r28f   1/1     Running   0          3m37s
+nginx-deployment-79b77776db-896rc   1/1     Running   0          3m37s
+nginx-deployment-79b77776db-8f2db   1/1     Running   0          10s
+nginx-deployment-79b77776db-df9lj   1/1     Running   0          3m37s
+nginx-deployment-79b77776db-gm7xk   1/1     Running   0          10s
+nginx-deployment-79b77776db-ht8nn   1/1     Running   0          10s
+nginx-deployment-79b77776db-qgxvf   1/1     Running   0          10s
+nginx-deployment-79b77776db-qqz7q   1/1     Running   0          10s
+nginx-deployment-79b77776db-s6r2x   1/1     Running   0          10s
+nginx-deployment-79b77776db-vzzfn   1/1     Running   0          3m37s
+controlplane $ helm rollback nginx nginx-chart --values envs/prod.yaml
+Error: unknown flag: --values
+controlplane $ helm rollback nginx nginx-chart                        
+Error: could not convert revision to a number: strconv.Atoi: parsing "nginx-chart": invalid syntax
+controlplane $ helm rollback nginx            
+Rollback was a success! Happy Helming!
+controlplane $ kubectl get pods
+NAME                                READY   STATUS    RESTARTS   AGE
+nginx-deployment-79b77776db-2r28f   1/1     Running   0          4m21s
+nginx-deployment-79b77776db-896rc   1/1     Running   0          4m21s
+nginx-deployment-79b77776db-df9lj   1/1     Running   0          4m21s
+nginx-deployment-79b77776db-vzzfn   1/1     Running   0          4m21s
+controlplane $ helm uninstall nginx
+release "nginx" uninstalled
+controlplane $ 

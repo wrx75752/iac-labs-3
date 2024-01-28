@@ -1,0 +1,354 @@
+Initialising Kubernetes... done
+
+controlplane $ curl -L -o terrascan.tar.gz https://github.com/tenable/terrascan/releases/download/v1.18.11/terrascan_1.18.11_Linux_x86_64.tar.gz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 22.9M  100 22.9M    0     0  24.5M      0 --:--:-- --:--:-- --:--:-- 93.8M
+controlplane $ tar -xf terrascan.tar.gz terrascan
+controlplane $ install terrascan /usr/local/bin && rm terrascan
+controlplane $ terrascan
+Terrascan
+
+Detect compliance and security violations across Infrastructure as Code to mitigate risk before provisioning cloud native infrastructure.
+For more information, please visit https://runterrascan.io/
+
+Usage:
+  terrascan [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  init        Initializes Terrascan and clones policies from the Terrascan GitHub repository.
+  scan        Detect compliance and security violations across Infrastructure as Code.
+  server      Run Terrascan as an API server
+  version     Terrascan version
+
+Flags:
+  -c, --config-path string      config file path
+  -h, --help                    help for terrascan
+  -l, --log-level string        log level (debug, info, warn, error, panic, fatal) (default "info")
+      --log-output-dir string   directory path to write the log and output files
+  -x, --log-type string         log output type (console, json) (default "console")
+  -o, --output string           output type (human, json, yaml, xml, junit-xml, sarif, github-sarif) (default "human")
+      --temp-dir string         temporary directory path to download remote repository,module and templates
+
+Use "terrascan [command] --help" for more information about a command.
+controlplane $ terrascan scan --help
+Terrascan
+
+Detect compliance and security violations across Infrastructure as Code to mitigate risk before provisioning cloud native infrastructure.
+
+Usage:
+  terrascan scan [flags]
+
+Flags:
+      --categories strings        list of categories of violations to be reported by terrascan (example: --categories="category1,category2")
+      --config-only               will output resource config (should only be used for debugging purposes)
+      --config-with-error         will output resource config and errors (if any)
+      --find-vuln                 fetches vulnerabilities identified in Docker images
+  -h, --help                      help for scan
+  -d, --iac-dir string            path to a directory containing one or more IaC files (default ".")
+  -f, --iac-file string           path to a single IaC file
+  -i, --iac-type string           iac type (arm, cft, docker, helm, k8s, kustomize, terraform, tfplan)
+      --iac-version string        iac version (arm: v1, cft: v1, docker: v1, helm: v3, k8s: v1, kustomize: v2, v3, v4, terraform: v12, v13, v14, v15, tfplan: v1)
+      --non-recursive             do not scan directories and modules recursively
+  -p, --policy-path stringArray   policy path directory
+  -t, --policy-type strings       policy type (all, aws, azure, docker, gcp, github, k8s) (default [all])
+  -r, --remote-type string        type of remote backend (git, s3, gcs, http, terraform-registry)
+  -u, --remote-url string         url pointing to remote IaC repository
+      --repo-ref string           branch of the repo being scanned
+      --repo-url string           URL of the repo being scanned, will be reflected in scan summary
+      --scan-rules strings        one or more rules to scan (example: --scan-rules="ruleID1,ruleID2")
+      --severity string           minimum severity level of the policy violations to be reported by terrascan
+      --show-passed               display passed rules, along with violations
+      --skip-rules strings        one or more rules to skip while scanning (example: --skip-rules="ruleID1,ruleID2")
+      --use-colors string         color output (auto, t, f) (default "auto")
+      --use-terraform-cache       use terraform init cache for remote modules (when used directory scan will be non recursive, flag applicable only with terraform IaC provider)
+      --values-files strings      one or more values files to scan(applicable for iactype=helm) (example: --values-files="file1-values.yaml,file2-values.yaml")
+  -v, --verbose                   will show violations with details (applicable for default output)
+      --webhook-token string      optional token used when sending authenticated requests to the notification webhook
+      --webhook-url string        webhook URL where Terrascan will send JSON scan report and normalized IaC JSON
+
+Global Flags:
+  -c, --config-path string      config file path
+  -l, --log-level string        log level (debug, info, warn, error, panic, fatal) (default "info")
+      --log-output-dir string   directory path to write the log and output files
+  -x, --log-type string         log output type (console, json) (default "console")
+  -o, --output string           output type (human, json, yaml, xml, junit-xml, sarif, github-sarif) (default "human")
+      --temp-dir string         temporary directory path to download remote repository,module and templates
+controlplane $ git clone https://github.com/mwidera/iac-labs-infra.git
+Cloning into 'iac-labs-infra'...
+remote: Enumerating objects: 211, done.
+remote: Counting objects: 100% (58/58), done.
+remote: Compressing objects: 100% (33/33), done.
+remote: Total 211 (delta 42), reused 25 (delta 25), pack-reused 153
+Receiving objects: 100% (211/211), 44.91 KiB | 2.99 MiB/s, done.
+Resolving deltas: 100% (86/86), done.
+controlplane $ cd iac-labs-infra/terraform/
+controlplane $ terrascan scan --iac-type terraform            
+2024/01/28 15:30:52 [DEBUG] GET https://registry.terraform.io/v1/providers/hashicorp/aws/versions
+
+
+Scan Errors -
+
+        IaC Type            :   terraform
+        Directory           :   /root/iac-labs-infra/terraform
+        Error Message       :   directory '/root/iac-labs-infra/terraform' has no terraform config files
+
+        -----------------------------------------------------------------------
+
+        IaC Type            :   terraform
+        Directory           :   /root/iac-labs-infra/terraform/zad1
+        Error Message       :   directory '/root/iac-labs-infra/terraform/zad1' has no terraform config files
+
+        -----------------------------------------------------------------------
+
+        IaC Type            :   terraform
+        Directory           :   /root/iac-labs-infra/terraform/zad1/3-moduly/modules
+        Error Message       :   directory '/root/iac-labs-infra/terraform/zad1/3-moduly/modules' has no terraform config files
+
+        -----------------------------------------------------------------------
+
+
+
+Violation Details -
+    
+        Description    :        EC2 instances should disable IMDS or require IMDSv2 as this can be related to the weaponization phase of kill chain
+        File           :        zad1/1-import/main.tf
+        Module Name    :        root
+        Plan Root      :        zad1/1-import
+        Line           :        15
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        EC2 instances should disable IMDS or require IMDSv2 as this can be related to the weaponization phase of kill chain
+        File           :        zad1/2-zmienne/main.tf
+        Module Name    :        root
+        Plan Root      :        zad1/2-zmienne
+        Line           :        29
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        EC2 instances should disable IMDS or require IMDSv2 as this can be related to the weaponization phase of kill chain
+        File           :        zad1/3-moduly/modules/ec2/main.tf
+        Module Name    :        webserver
+        Plan Root      :        zad1/3-moduly
+        Line           :        19
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        EC2 instances should disable IMDS or require IMDSv2 as this can be related to the weaponization phase of kill chain
+        File           :        zad1/3-moduly/modules/ec2/main.tf
+        Module Name    :        webserver2
+        Plan Root      :        zad1/3-moduly
+        Line           :        19
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        EC2 instances should disable IMDS or require IMDSv2 as this can be related to the weaponization phase of kill chain
+        File           :        zad1/3-moduly/modules/ec2/main.tf
+        Module Name    :        root
+        Plan Root      :        zad1/3-moduly/modules/ec2
+        Line           :        19
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure that your AWS application is not deployed within the default Virtual Private Cloud in order to follow security best practices
+        File           :        zad1/1-import/main.tf
+        Module Name    :        root
+        Plan Root      :        zad1/1-import
+        Line           :        15
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure that your AWS application is not deployed within the default Virtual Private Cloud in order to follow security best practices
+        File           :        zad1/2-zmienne/main.tf
+        Module Name    :        root
+        Plan Root      :        zad1/2-zmienne
+        Line           :        29
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure that your AWS application is not deployed within the default Virtual Private Cloud in order to follow security best practices
+        File           :        zad1/3-moduly/modules/ec2/main.tf
+        Module Name    :        webserver
+        Plan Root      :        zad1/3-moduly
+        Line           :        19
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure that your AWS application is not deployed within the default Virtual Private Cloud in order to follow security best practices
+        File           :        zad1/3-moduly/modules/ec2/main.tf
+        Module Name    :        webserver2
+        Plan Root      :        zad1/3-moduly
+        Line           :        19
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure that your AWS application is not deployed within the default Virtual Private Cloud in order to follow security best practices
+        File           :        zad1/3-moduly/modules/ec2/main.tf
+        Module Name    :        root
+        Plan Root      :        zad1/3-moduly/modules/ec2
+        Line           :        19
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure that detailed monitoring is enabled for EC2 instances.
+        File           :        zad1/1-import/main.tf
+        Module Name    :        root
+        Plan Root      :        zad1/1-import
+        Line           :        15
+        Severity       :        HIGH
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure that detailed monitoring is enabled for EC2 instances.
+        File           :        zad1/2-zmienne/main.tf
+        Module Name    :        root
+        Plan Root      :        zad1/2-zmienne
+        Line           :        29
+        Severity       :        HIGH
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure that detailed monitoring is enabled for EC2 instances.
+        File           :        zad1/3-moduly/modules/ec2/main.tf
+        Module Name    :        webserver
+        Plan Root      :        zad1/3-moduly
+        Line           :        19
+        Severity       :        HIGH
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure that detailed monitoring is enabled for EC2 instances.
+        File           :        zad1/3-moduly/modules/ec2/main.tf
+        Module Name    :        webserver2
+        Plan Root      :        zad1/3-moduly
+        Line           :        19
+        Severity       :        HIGH
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure that detailed monitoring is enabled for EC2 instances.
+        File           :        zad1/3-moduly/modules/ec2/main.tf
+        Module Name    :        root
+        Plan Root      :        zad1/3-moduly/modules/ec2
+        Line           :        19
+        Severity       :        HIGH
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure VPC flow logging is enabled in all VPCs
+        File           :        zad1/2-zmienne/main.tf
+        Module Name    :        root
+        Plan Root      :        zad1/2-zmienne
+        Line           :        14
+        Severity       :        LOW
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure VPC flow logging is enabled in all VPCs
+        File           :        zad1/3-moduly/modules/vpc/main.tf
+        Module Name    :        aws_vpc
+        Plan Root      :        zad1/3-moduly
+        Line           :        1
+        Severity       :        LOW
+        -----------------------------------------------------------------------
+
+        Description    :        Ensure VPC flow logging is enabled in all VPCs
+        File           :        zad1/3-moduly/modules/vpc/main.tf
+        Module Name    :        root
+        Plan Root      :        zad1/3-moduly/modules/vpc
+        Line           :        1
+        Severity       :        LOW
+        -----------------------------------------------------------------------
+
+
+Scan Summary -
+
+        File/Folder         :   /root/iac-labs-infra/terraform
+        IaC Type            :   terraform
+        Scanned At          :   2024-01-28 15:30:55.486191387 +0000 UTC
+        Policies Validated  :   7
+        Violated Policies   :   18
+        Low                 :   3
+        Medium              :   10
+        High                :   5
+controlplane $
+controlplane $ cd && cd iac-labs-infra && git submodule init && git submodule update
+Submodule 'iac-labs' (https://github.com/mwidera/iac-labs.git) registered for path 'iac-labs'
+Cloning into '/root/iac-labs-infra/iac-labs'...
+Submodule path 'iac-labs': checked out 'b27aaf12b25be0dfcb2549a1e1ce1c55e33d7a24'
+controlplane $ ls
+README.md  iac-labs  pulumi  terraform
+controlplane $ ls iac-labs/
+.dockerignore  .git           .gitignore     example-app/   
+controlplane $ ls iac-labs/example-app/
+CHANGELOG.md  LICENSE.md  apps        env.sample   pyproject.toml  tests
+Dockerfile    README.md   env.docker  poetry.lock  run.py
+controlplane $ terrascan scan --iac-type docker   
+
+
+
+Scan Summary -
+
+        File/Folder         :   /root/iac-labs-infra
+        IaC Type            :   docker
+        Scanned At          :   2024-01-28 15:34:23.638793529 +0000 UTC
+        Policies Validated  :   22
+        Violated Policies   :   0
+        Low                 :   0
+        Medium              :   0
+        High                :   0
+controlplane $ ls
+README.md  iac-labs  pulumi  terraform
+controlplane $ cd iac-labs/example-app/
+controlplane $ terrascan scan --iac-type docker
+
+
+
+Scan Summary -
+
+        File/Folder         :   /root/iac-labs-infra/iac-labs/example-app
+        IaC Type            :   docker
+        Scanned At          :   2024-01-28 15:34:41.328106642 +0000 UTC
+        Policies Validated  :   22
+        Violated Policies   :   0
+        Low                 :   0
+        Medium              :   0
+        High                :   0
+controlplane $ terrascan scan -i k8s -r git -u https://github.com/kubernetes/examples.git
+...
+        -----------------------------------------------------------------------
+
+        Description    :        Vulnerable to CVE-2020-8555 (affected version of kube-controller-manager: v1.18.0, v1.17.0 - v1.17.4, v1.16.0 - v1.16.8, and v1.15.11
+        File           :        staging/volumes/quobyte/quobyte-pod.yaml
+        Line           :        1
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        Vulnerable to CVE-2020-8555 (affected version of kube-controller-manager: v1.18.0, v1.17.0 - v1.17.4, v1.16.0 - v1.16.8, and v1.15.11
+        File           :        volumes/storageos/storageos-pod.yaml
+        Line           :        1
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        Vulnerable to CVE-2020-8555 (affected version of kube-controller-manager: v1.18.0, v1.17.0 - v1.17.4, v1.16.0 - v1.16.8, and v1.15.11
+        File           :        staging/spark/spark-gluster/spark-worker-controller.yaml
+        Line           :        1
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+        Description    :        Vulnerable to CVE-2020-8555 (affected version of kube-controller-manager: v1.18.0, v1.17.0 - v1.17.4, v1.16.0 - v1.16.8, and v1.15.11
+        File           :        staging/spark/spark-gluster/spark-master-controller.yaml
+        Line           :        1
+        Severity       :        MEDIUM
+        -----------------------------------------------------------------------
+
+
+Scan Summary -
+
+        File/Folder         :   https://github.com/kubernetes/examples.git
+        IaC Type            :   k8s
+        Scanned At          :   2024-01-28 15:36:15.209936642 +0000 UTC
+        Policies Validated  :   42
+        Violated Policies   :   1689
+        Low                 :   318
+        Medium              :   1099
+        High                :   272
+controlplane $ 
